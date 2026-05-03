@@ -8,6 +8,9 @@ namespace Console {
     // main() 최상단에서 한 번 호출 — ANSI 이스케이프 코드 활성화
     void init();
 
+    // 화면 지우기 + 커서 좌상단 이동
+    void clear();
+
     // ── ANSI 코드 상수 ────────────────────────────────────────────────────────
     namespace A {
         constexpr const char* RST       = "\033[0m";

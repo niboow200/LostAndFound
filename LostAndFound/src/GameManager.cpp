@@ -24,6 +24,8 @@ void GameManager::run() {
     std::cin.get();
 
     while (current_phase_ != GamePhase::GAME_OVER) {
+        
+
         switch (current_phase_) {
         case GamePhase::MORNING_INTAKE:    morningPhase();   break;
         case GamePhase::AFTERNOON_SERVICE: afternoonPhase(); break;
@@ -39,6 +41,7 @@ void GameManager::morningPhase() {
     loadDayData();
     if (current_phase_ == GamePhase::GAME_OVER) return;
 
+    std::cout << "\033[2J\033[1;1H";
     printPhaseHeader(
         "\xe2\x98\x80",  // ☀
         std::to_string(day_) + "일차 아침  \xe2\x94\x80  분실물 접수",
@@ -78,6 +81,7 @@ void GameManager::afternoonPhase() {
 }
 
 void GameManager::endOfDayPhase() {
+    std::cout << "\033[2J\033[1;1H";
     printPhaseHeader(
         "\xe2\x98\x85",  // ★
         std::to_string(day_) + "일차 마감  \xe2\x94\x80  하루 결산",
@@ -115,8 +119,8 @@ void GameManager::endOfDayPhase() {
 // ─── 손님 응대: 행동 루프 ────────────────────────────────────────────────────
 
 void GameManager::handleCustomer(const Customer& customer, int index, int total) {
-    // 손님 도착
-    std::cout << "\n";
+    // 손님 도착 — 새 손님마다 화면 클리어
+    std::cout << "\033[2J\033[1;1H";
     thinRule();
     std::cout << "\n  "
               << paint("손님 " + std::to_string(index) + " / " + std::to_string(total), A::GRAY)
@@ -124,15 +128,16 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
               << A::BOLD << A::B_CYAN << customer.getName() << A::RST
               << "\n\n";
 
-    std::cout << "  "
-              << A::CYAN << "\xe2\x80\x9c"             // "
-              << customer.getDialogueText()
-              << "\xe2\x80\x9d" << A::RST              // "
-              << "\n";
-
     // ─ 행동 선택 루프 ─────────────────────────────────────────────────────────
     while (true) {
+        // 매 루프마다 고객 대사를 다시 출력 — 조사 후 돌아와도 힌트가 보임
         std::cout << "\n  "
+                  << A::BOLD << A::B_CYAN << customer.getName() << A::RST
+                  << A::GRAY << "  \xe2\x80\x94  " << A::RST  // —
+                  << A::CYAN << "\xe2\x80\x9c"                 // "
+                  << customer.getDialogueText()
+                  << "\xe2\x80\x9d" << A::RST                  // "
+                  << "\n\n  "
                   << paint("[1]", A::B_GREEN) << " 물건 주기   "
                   << paint("[2]", A::B_CYAN)  << " 물건 조사   "
                   << paint("[0]", A::GRAY)    << " 돌려보내기"
@@ -146,6 +151,8 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
                       << "  " << customer.getName() << "이(가) 실망하며 돌아갑니다.\n";
             player_.applyPenalty(0, 10);
             std::cout << "  " << paint("   \xe2\x88\x92평판 10", A::RED) << "\n";
+            std::cout << "\n  " << dim("(Enter 키를 눌러 계속)") << "\n";
+            std::cin.get();
             break;
         }
 
@@ -168,6 +175,8 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
                 player_.applyReward(50, 5);
                 std::cout << "  " << paint("   +50원  +평판 5", A::B_GREEN) << "\n";
                 storage_.erase(storage_.begin() + (item_choice - 1));
+                std::cout << "\n  " << dim("(Enter 키를 눌러 계속)") << "\n";
+                std::cin.get();
             } else {
                 std::cout << "  " << paint("\xe2\x9c\x98", A::B_RED)    // ✘
                           << "  "
@@ -176,6 +185,8 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
                           << A::RST << "\n";
                 player_.applyPenalty(0, 15);
                 std::cout << "  " << paint("   \xe2\x88\x92평판 15", A::RED) << "\n";
+                std::cout << "\n  " << dim("(Enter 키를 눌러 계속)") << "\n";
+                std::cin.get();
             }
             break;
         }
@@ -220,7 +231,9 @@ void GameManager::handleExamineAction() {
               << "\xe2\x80\x9d" << A::RST   // "
               << "\n";
     thinRule();
-    std::cout << "\n";
+    std::cout << "\n  " << dim("(Enter 키를 눌러 계속)") << "\n";
+    std::cin.get();
+    std::cout << "\033[2J\033[1;1H";
 }
 
 // ─── 일차별 데이터 로딩 ───────────────────────────────────────────────────────

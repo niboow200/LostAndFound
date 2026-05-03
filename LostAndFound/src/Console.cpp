@@ -10,6 +10,10 @@ void Console::init() {
         SetConsoleMode(h, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 }
 
+void Console::clear() {
+    std::cout << "\033[2J\033[1;1H";
+}
+
 // ── 문자열 래퍼 ───────────────────────────────────────────────────────────────
 
 std::string Console::paint(const std::string& s, const char* color) {
