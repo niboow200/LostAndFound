@@ -41,7 +41,7 @@ void GameManager::morningPhase() {
 
     printPhaseHeader(
         "\xe2\x98\x80",  // ☀
-        std::to_string(day_) + "일차 아침  \xe2\x94\x80  분실물 접수",  // ─
+        std::to_string(day_) + "일차 아침  \xe2\x94\x80  분실물 접수",
         A::B_YELLOW);
 
     std::cout << "  오늘 접수된 분실물:\n\n";
@@ -49,11 +49,8 @@ void GameManager::morningPhase() {
     for (size_t i = 0; i < storage_.size(); ++i) {
         std::cout << "    "
                   << paint("[" + std::to_string(i + 1) + "]", A::CYAN)
-                  << "  " << bold(storage_[i].getName());
-        const auto& desc = storage_[i].getDescription();
-        if (!desc.empty())
-            std::cout << "  " << dim("(" + desc + ")");
-        std::cout << "\n";
+                  << "  " << bold(storage_[i].getName()) << "\n";
+        // owner_key는 표시하지 않음 — 플레이어가 조사해서 알아내야 함
     }
 
     std::cout << "\n  " << dim("손님들이 찾아올 시간입니다. (Enter)") << "\n";
@@ -115,9 +112,10 @@ void GameManager::endOfDayPhase() {
     }
 }
 
-// ─── 손님 한 명 응대 ──────────────────────────────────────────────────────────
+// ─── 손님 응대: 행동 루프 ────────────────────────────────────────────────────
 
 void GameManager::handleCustomer(const Customer& customer, int index, int total) {
+    // 손님 도착
     std::cout << "\n";
     thinRule();
     std::cout << "\n  "
@@ -127,43 +125,65 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
               << "\n\n";
 
     std::cout << "  "
-              << A::CYAN << "\xe2\x80\x9c"  // 여는 따옴표 "
+              << A::CYAN << "\xe2\x80\x9c"             // "
               << customer.getDialogueText()
-              << "\xe2\x80\x9d" << A::RST   // 닫는 따옴표 "
-              << "\n\n";
+              << "\xe2\x80\x9d" << A::RST              // "
+              << "\n";
 
-    // [확장 예정] 행동 선택지: 물건 건네기 / 질문하기 / 조사하기
-    // displayActionMenu();
+    // ─ 행동 선택 루프 ─────────────────────────────────────────────────────────
+    while (true) {
+        std::cout << "\n  "
+                  << paint("[1]", A::B_GREEN) << " 물건 주기   "
+                  << paint("[2]", A::B_CYAN)  << " 물건 조사   "
+                  << paint("[0]", A::GRAY)    << " 돌려보내기"
+                  << "  > ";
+        int action = getPlayerChoice(2);
+        std::cout << "\n";
 
-    displayStorage();
-
-    std::cout << "  어떤 물건을 드릴까요?  "
-              << paint("[0] 돌려보내기", A::GRAY) << "  > ";
-    int choice = getPlayerChoice(static_cast<int>(storage_.size()));
-    std::cout << "\n";
-
-    if (choice == 0) {
-        std::cout << "  " << paint("\xe2\x9c\x98", A::B_RED)  // ✘
-                  << "  " << customer.getName() << "이(가) 실망하며 돌아갑니다.\n";
-        player_.applyPenalty(0, 10);
-        std::cout << "  " << paint("   \xe2\x88\x92평판 10", A::RED) << "\n";  // −
-    } else {
-        const Item& selected = storage_[choice - 1];
-        if (customer.verifyItem(selected)) {
-            std::cout << "  " << paint("\xe2\x9c\x94", A::B_GREEN)  // ✔
-                      << "  "
-                      << A::B_GREEN << "\xe2\x80\x9c맞아요! 감사합니다!\xe2\x80\x9d" << A::RST
-                      << "\n";
-            player_.applyReward(50, 5);
-            std::cout << "  " << paint("   +50원  +평판 5", A::B_GREEN) << "\n";
-            storage_.erase(storage_.begin() + (choice - 1));
-        } else {
+        // ── 0: 돌려보내기 ────────────────────────────────────────────────────
+        if (action == 0) {
             std::cout << "  " << paint("\xe2\x9c\x98", A::B_RED)  // ✘
-                      << "  "
-                      << A::B_RED << "\xe2\x80\x9c이건 제 물건이 아닌데요...\xe2\x80\x9d" << A::RST
-                      << "\n";
-            player_.applyPenalty(0, 15);
-            std::cout << "  " << paint("   \xe2\x88\x92평판 15", A::RED) << "\n";
+                      << "  " << customer.getName() << "이(가) 실망하며 돌아갑니다.\n";
+            player_.applyPenalty(0, 10);
+            std::cout << "  " << paint("   \xe2\x88\x92평판 10", A::RED) << "\n";
+            break;
+        }
+
+        // ── 1: 물건 주기 ─────────────────────────────────────────────────────
+        if (action == 1) {
+            displayStorage();
+            std::cout << "  줄 물건을 고르세요  " << paint("(0: 취소)", A::GRAY) << "  > ";
+            int item_choice = getPlayerChoice(static_cast<int>(storage_.size()));
+            std::cout << "\n";
+
+            if (item_choice == 0) continue;  // 행동 메뉴로 돌아가기
+
+            const Item& selected = storage_[item_choice - 1];
+            if (customer.verifyItem(selected)) {
+                std::cout << "  " << paint("\xe2\x9c\x94", A::B_GREEN)  // ✔
+                          << "  "
+                          << A::B_GREEN
+                          << "\xe2\x80\x9c맞아요! 감사합니다!\xe2\x80\x9d"
+                          << A::RST << "\n";
+                player_.applyReward(50, 5);
+                std::cout << "  " << paint("   +50원  +평판 5", A::B_GREEN) << "\n";
+                storage_.erase(storage_.begin() + (item_choice - 1));
+            } else {
+                std::cout << "  " << paint("\xe2\x9c\x98", A::B_RED)    // ✘
+                          << "  "
+                          << A::B_RED
+                          << "\xe2\x80\x9c이건 제 물건이 아닌데요...\xe2\x80\x9d"
+                          << A::RST << "\n";
+                player_.applyPenalty(0, 15);
+                std::cout << "  " << paint("   \xe2\x88\x92평판 15", A::RED) << "\n";
+            }
+            break;
+        }
+
+        // ── 2: 물건 조사 ─────────────────────────────────────────────────────
+        if (action == 2) {
+            handleExamineAction();
+            // 조사 후 행동 메뉴로 돌아감 (루프 계속)
         }
     }
 
@@ -172,7 +192,40 @@ void GameManager::handleCustomer(const Customer& customer, int index, int total)
     std::cout << "\n";
 }
 
+// ─── 물건 조사 ────────────────────────────────────────────────────────────────
+
+void GameManager::handleExamineAction() {
+    std::cout << "  " << paint("조사할 물건을 고르세요", A::B_CYAN)
+              << "  " << paint("(0: 취소)", A::GRAY) << "\n\n";
+
+    // 보관소 목록 출력
+    displayStorage();
+
+    std::cout << "  > ";
+    int choice = getPlayerChoice(static_cast<int>(storage_.size()));
+    std::cout << "\n";
+
+    if (choice == 0) return;
+
+    const Item& item = storage_[choice - 1];
+
+    // 조사 결과 박스
+    thinRule();
+    std::cout << "  "
+              << paint("[ 조사 ]", A::B_CYAN) << "  "
+              << bold(item.getName()) << "\n\n";
+    std::cout << "  " << A::CYAN
+              << "\xe2\x80\x9c"             // "
+              << item.getDescription()
+              << "\xe2\x80\x9d" << A::RST   // "
+              << "\n";
+    thinRule();
+    std::cout << "\n";
+}
+
 // ─── 일차별 데이터 로딩 ───────────────────────────────────────────────────────
+// Item 생성자: (id, 표시이름, 조사텍스트, 소유자키)
+// Customer 생성자: (이름, 소유자키, 대사)
 
 void GameManager::loadDayData() {
     storage_.clear();
@@ -180,30 +233,54 @@ void GameManager::loadDayData() {
 
     if (day_ == 1) {
         storage_ = {
-            {1, "김철수의 노트북", "오래된 검정색 노트북"},
-            {2, "이영희의 가방",   "붉은색 숄더백"},
-            {3, "박민준의 우산",   "투명한 접이식 우산"},
-            {4, "최수진의 지갑",   "갈색 가죽 지갑"},
+            {1,
+             "낡은 검정 노트북",
+             "키보드의 C키가 심하게 닳아있다. 배터리 칸 안쪽에 '김철수'라는 이름이 적힌 스티커가 붙어있다.",
+             "김철수"},
+            {2,
+             "붉은색 숄더백",
+             "안쪽 작은 주머니에 카페 영수증이 있다. 이름란에 '이영희'라고 적혀있다.",
+             "이영희"},
+            {3,
+             "투명 접이식 우산",
+             "손잡이에 검은 테이프가 감겨있다. 우산 케이스 안쪽에 유성 펜으로 '박민준'이라 쓰여있다.",
+             "박민준"},
+            {4,
+             "갈색 가죽 지갑",
+             "안쪽에 명함이 끼워져 있다. '최수진, 마케팅팀 대리'라고 인쇄되어 있다.",
+             "최수진"},
         };
         customers_ = {
-            {"이영희", "이영희의 가방",   "가방 안에 지갑이 들어있어서 빨리 찾아야 해요."},
-            {"김철수", "김철수의 노트북", "노트북 없으면 오늘 발표를 못 해요, 제발요!"},
-            {"박민준", "박민준의 우산",   "비 올 것 같아서요. 제 우산 있나요?"},
-            {"최수진", "최수진의 지갑",   "카드가 다 들어있어서 정말 급합니다."},
+            {"이영희", "이영희", "가방 안에 지갑이 들어있어서 빨리 찾아야 해요."},
+            {"김철수", "김철수", "노트북 없으면 오늘 발표를 못 해요, 제발요!"},
+            {"박민준", "박민준", "비 올 것 같아서요. 제 우산 있나요?"},
+            {"최수진", "최수진", "카드가 다 들어있어서 정말 급합니다."},
         };
     }
     else if (day_ == 2) {
         storage_ = {
-            {5, "홍길동의 열쇠",   "차키와 집 열쇠 한 묶음"},
-            {6, "신사임당의 코트", "고급 캐시미어 코트"},
-            {7, "장보고의 책",     "『바다의 역사』 두꺼운 양장본"},
-            {8, "유관순의 목도리", "붉은 줄무늬 목도리"},
+            {5,
+             "차키와 집 열쇠 묶음",
+             "열쇠고리에 작은 인형이 달려있다. 고리 뒷면 금속판에 '홍길동'이라는 이름이 새겨져 있다.",
+             "홍길동"},
+            {6,
+             "고급 캐시미어 코트",
+             "안쪽 라벨 옆에 손바느질로 단 이름표가 있다. '신사임당'이라고 한자로 수놓아져 있다.",
+             "신사임당"},
+            {7,
+             "두꺼운 양장본 책",
+             "책 첫 페이지 여백에 펜으로 이름이 적혀있다. '장보고 소장'이라고 쓰여있다.",
+             "장보고"},
+            {8,
+             "붉은 줄무늬 목도리",
+             "목도리 끝 부분에 흰 실로 이름이 수놓아져 있다. '유관순'이라고 또렷하게 읽힌다.",
+             "유관순"},
         };
         customers_ = {
-            {"신사임당", "신사임당의 코트",  "어머, 여기 맡겼었는데 맞죠?"},
-            {"홍길동",   "홍길동의 열쇠",    "열쇠 없으면 차도 집도 못 들어가요."},
-            {"유관순",   "유관순의 목도리",  "할머니 생신 선물로 받은 거라 소중해요."},
-            {"장보고",   "장보고의 책",      "도서관 반납 기한이 내일이에요!"},
+            {"신사임당", "신사임당", "어머, 여기 맡겼었는데 맞죠?"},
+            {"홍길동",   "홍길동",   "열쇠 없으면 차도 집도 못 들어가요."},
+            {"유관순",   "유관순",   "할머니 생신 선물로 받은 거라 소중해요."},
+            {"장보고",   "장보고",   "도서관 반납 기한이 내일이에요!"},
         };
     }
     else {

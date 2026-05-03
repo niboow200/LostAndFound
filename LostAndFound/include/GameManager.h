@@ -24,17 +24,17 @@ private:
     void endOfDayPhase();
 
     // --- 손님 한 명 응대 ---
-    void handleCustomer(const Customer& customer, int index, int total);
+    void handleCustomer   (const Customer& customer, int index, int total);
+    void handleExamineAction();  // [2] 물건 조사 행동 처리
 
     // --- 일차별 데이터 로딩 ---
     void loadDayData();
 
     // --- UI 헬퍼 ---
-    void displayStorage()              const;
+    void displayStorage()               const;
     int  getPlayerChoice(int max_index) const;
 
     // [확장 예정] 추리 / 미니게임
-    // void examineItem     (const Item& item);
     // void questionCustomer(Customer& customer);
     // bool runMiniGame     (Customer& customer);
 

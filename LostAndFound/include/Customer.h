@@ -1,14 +1,15 @@
 #pragma once
 #include <string>
 
-class Item;  // forward declaration — Customer는 Item을 소유하지 않음
+class Item;
 
 class Customer {
 public:
-    Customer(std::string name, std::string claimed_item_name, std::string dialogue = "");
+    // owner_key : item.getOwnerKey()와 비교할 식별 키 (MVP에서는 고객 이름과 동일)
+    Customer(std::string name, std::string owner_key, std::string dialogue = "");
 
-    const std::string& getName()            const;
-    const std::string& getClaimedItemName() const;
+    const std::string& getName()     const;
+    const std::string& getOwnerKey() const;
 
     std::string greet()           const;  // "이름: \"대사\"" 형식 전체 반환
     std::string getDialogueText() const;  // 대사 텍스트만 반환 (UI 분리용)
@@ -21,7 +22,7 @@ public:
 
 private:
     std::string name_;
-    std::string claimed_item_name_;
+    std::string owner_key_;
     std::string dialogue_;
 
     // [확장 예정]
