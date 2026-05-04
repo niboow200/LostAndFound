@@ -1,25 +1,42 @@
 #include "Customer.h"
 #include "Item.h"
+#include "Player.h"
+#include "Console.h"
+#include <iostream>
+using namespace std;
 
-Customer::Customer(std::string name, std::string owner_key, std::string dialogue)
-    : name_(std::move(name))
-    , owner_key_(std::move(owner_key))
-    , dialogue_(std::move(dialogue)) {}
+Customer::Customer(string name, string owner_key, string dialogue)
+    : name_(move(name))
+    , owner_key_(move(owner_key))
+    , dialogue_(move(dialogue)) {}
 
-const std::string& Customer::getName()     const { return name_; }
-const std::string& Customer::getOwnerKey() const { return owner_key_; }
+const string& Customer::getName()     const { return name_; }
+const string& Customer::getOwnerKey() const { return owner_key_; }
 
-std::string Customer::getDialogueText() const {
+string Customer::getDialogueText() const {
     if (!dialogue_.empty()) return dialogue_;
     return "안녕하세요. 제 물건을 찾으러 왔습니다.";
 }
 
-std::string Customer::greet() const {
+string Customer::greet() const {
     return name_ + ": \"" + getDialogueText() + "\"";
 }
 
 bool Customer::verifyItem(const Item& item) const {
-    // MVP: owner_key 직접 비교
-    // 확장 시: 단서(clue) 기반 다중 조건 검증으로 교체
     return item.getOwnerKey() == owner_key_;
+}
+
+void Customer::processResult(bool isCorrect, Player& player, bool isDismissed) {
+    using namespace Console;
+
+    if (isDismissed) {
+        player.applyPenalty(0, 10);
+        cout << "  " << paint("   \xe2\x88\x92평판 10", A::RED) << "\n";
+    } else if (isCorrect) {
+        player.applyReward(50, 5);
+        cout << "  " << paint("   +50\xec\x9b\x90  +\xed\x8f\x89\xed\x8c\x90 5", A::B_GREEN) << "\n";
+    } else {
+        player.applyPenalty(0, 15);
+        cout << "  " << paint("   \xe2\x88\x92평판 15", A::RED) << "\n";
+    }
 }

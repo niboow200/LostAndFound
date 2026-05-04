@@ -146,7 +146,11 @@
   <ItemGroup>
     <ClInclude Include="include\Console.h" />
     <ClInclude Include="include\Item.h" />
+    <ClInclude Include="include\LockedItem.h" />
+    <ClInclude Include="include\FragileItem.h" />
     <ClInclude Include="include\Customer.h" />
+    <ClInclude Include="include\ImposterCustomer.h" />
+    <ClInclude Include="include\VipCustomer.h" />
     <ClInclude Include="include\Player.h" />
     <ClInclude Include="include\GameManager.h" />
   </ItemGroup>
@@ -155,7 +159,11 @@
   <ItemGroup>
     <ClCompile Include="src\Console.cpp" />
     <ClCompile Include="src\Item.cpp" />
+    <ClCompile Include="src\LockedItem.cpp" />
+    <ClCompile Include="src\FragileItem.cpp" />
     <ClCompile Include="src\Customer.cpp" />
+    <ClCompile Include="src\ImposterCustomer.cpp" />
+    <ClCompile Include="src\VipCustomer.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\GameManager.cpp" />
     <ClCompile Include="src\main.cpp" />

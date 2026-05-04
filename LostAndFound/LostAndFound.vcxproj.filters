@@ -22,7 +22,19 @@
     <ClInclude Include="include\Item.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="include\LockedItem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FragileItem.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="include\Customer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ImposterCustomer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VipCustomer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="include\Player.h">
@@ -40,7 +52,19 @@
     <ClCompile Include="src\Item.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="src\LockedItem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FragileItem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="src\Customer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ImposterCustomer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VipCustomer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="src\Player.cpp">

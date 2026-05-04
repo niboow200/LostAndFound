@@ -1,31 +1,26 @@
 #pragma once
 #include <string>
+using std::string;
 
 class Item;
+class Player;
 
 class Customer {
 public:
-    // owner_key : item.getOwnerKey()와 비교할 식별 키 (MVP에서는 고객 이름과 동일)
-    Customer(std::string name, std::string owner_key, std::string dialogue = "");
+    Customer(string name, string owner_key, string dialogue = "");
+    virtual ~Customer() = default;
 
-    const std::string& getName()     const;
-    const std::string& getOwnerKey() const;
+    const string& getName()     const;
+    const string& getOwnerKey() const;
 
-    std::string greet()           const;  // "이름: \"대사\"" 형식 전체 반환
-    std::string getDialogueText() const;  // 대사 텍스트만 반환 (UI 분리용)
-    bool        verifyItem(const Item& item) const;
+    virtual string greet()                     const;
+    virtual string getDialogueText()            const;
+    virtual bool   verifyItem(const Item& item) const;
 
-    // [확장 예정] 질문 / 미니게임 시스템
-    // std::string answerQuestion(const std::string& topic) const;
-    // bool        isDifficult()                             const;
-    // bool        runMiniGame();
+    virtual void processResult(bool isCorrect, Player& player, bool isDismissed = false);
 
-private:
-    std::string name_;
-    std::string owner_key_;
-    std::string dialogue_;
-
-    // [확장 예정]
-    // bool is_difficult_ = false;
-    // std::map<std::string, std::string> qa_table_;
+protected:
+    string name_;
+    string owner_key_;
+    string dialogue_;
 };
